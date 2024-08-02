@@ -128,6 +128,32 @@ payment_gateway/
    go test ./...
    ```
 
+### Highlights of UUID Implementation
+
+- **UUID Generation**: UUIDs are generated based on card number, amount, and timestamp to ensure uniqueness.
+- **Consistency**: The use of UUIDs ensures consistent and unique identification of each payment, making retrieval and tracking easier.
+- **Security**: Masking card numbers in stored data enhances security and PCI compliance.
+
+### Database Implementation
+
+- **SQLite**: The project uses SQLite for simplicity and ease of setup. This choice is suitable for development and testing environments. In a production environment, a more robust and scalable database system like PostgreSQL or MySQL should be considered.
+- **ORM**: GORM is used as the ORM for database interactions. GORM provides an easy-to-use interface for CRUD operations and integrates well with Go's ecosystem.
+
+### Why Choose Go
+
+- **Performance**: Go provides high performance with its statically compiled binaries, making it an excellent choice for a high-throughput payment gateway.
+- **Concurrency**: Go's built-in support for concurrency with goroutines and channels makes it ideal for handling multiple payment transactions simultaneously.
+- **Simplicity**: Go's syntax is simple and clean, reducing the complexity of the codebase and making it easier to maintain.
+- **Strong Standard Library**: Go's standard library provides robust support for networking, HTTP servers, and cryptography, all of which are essential for a payment gateway.
+- **Community and Ecosystem**: Go has a strong and active community, with a wealth of libraries and frameworks that can accelerate development.
+
+### Workflow of Bank Simulator
+
+- **Endpoint**: The bank simulator exposes a POST endpoint `/simulate_bank` that mimics the behavior of an acquiring bank.
+- **Request Handling**: When a request is received, the simulator parses the payment details and randomly determines whether the payment is approved or declined.
+- **Response Simulation**: The simulator returns a response with a status of either "APPROVED" or "DECLINED", along with a masked card number for security.
+- **Logging**: All requests and responses are logged for debugging and analysis purposes.
+
 ### Assumptions Made
 
 - **Environment Variables**: The `.env` file is used to configure necessary environment variables. The application assumes this file is properly set up.
@@ -158,29 +184,3 @@ payment_gateway/
 - **Deployment**: Use containerization with Docker and orchestration with Kubernetes to ensure consistent deployments and scaling.
 - **CI/CD**: Implement continuous integration and continuous deployment pipelines using tools like GitHub Actions or Jenkins to automate testing and deployment.
 - **Monitoring**: Use monitoring tools like Prometheus and Grafana for real-time system monitoring and alerting.
-
-### Highlights of UUID Implementation
-
-- **UUID Generation**: UUIDs are generated based on card number, amount, and timestamp to ensure uniqueness.
-- **Consistency**: The use of UUIDs ensures consistent and unique identification of each payment, making retrieval and tracking easier.
-- **Security**: Masking card numbers in stored data enhances security and PCI compliance.
-
-### Database Implementation
-
-- **SQLite**: The project uses SQLite for simplicity and ease of setup. This choice is suitable for development and testing environments. In a production environment, a more robust and scalable database system like PostgreSQL or MySQL should be considered.
-- **ORM**: GORM is used as the ORM for database interactions. GORM provides an easy-to-use interface for CRUD operations and integrates well with Go's ecosystem.
-
-### Why Choose Go
-
-- **Performance**: Go provides high performance with its statically compiled binaries, making it an excellent choice for a high-throughput payment gateway.
-- **Concurrency**: Go's built-in support for concurrency with goroutines and channels makes it ideal for handling multiple payment transactions simultaneously.
-- **Simplicity**: Go's syntax is simple and clean, reducing the complexity of the codebase and making it easier to maintain.
-- **Strong Standard Library**: Go's standard library provides robust support for networking, HTTP servers, and cryptography, all of which are essential for a payment gateway.
-- **Community and Ecosystem**: Go has a strong and active community, with a wealth of libraries and frameworks that can accelerate development.
-
-### Workflow of Bank Simulator
-
-- **Endpoint**: The bank simulator exposes a POST endpoint `/simulate_bank` that mimics the behavior of an acquiring bank.
-- **Request Handling**: When a request is received, the simulator parses the payment details and randomly determines whether the payment is approved or declined.
-- **Response Simulation**: The simulator returns a response with a status of either "APPROVED" or "DECLINED", along with a masked card number for security.
-- **Logging**: All requests and responses are logged for debugging and analysis purposes.
