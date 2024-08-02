@@ -1,30 +1,42 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"log"
+	"os"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"github.com/joho/godotenv"
+
+	"payment_gateway/models"
+	"payment_gateway/router"
+	"payment_gateway/services"
 )
 
 func main() {
-	// Initialize the Gin router
-	r := gin.Default()
+	log.Println("Starting main function")
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
 	// Initialize the database
-	var err error
-	db, err = gorm.Open("sqlite3", "payments.db")
+	db, err := gorm.Open("sqlite3", "payments.db")
 	if err != nil {
-		panic("failed to connect database")
+		log.Fatalf("Failed to connect to database: %v\n", err)
 	}
 	defer db.Close()
 
-	// Auto migrate the Payment model
-	db.AutoMigrate(&Payment{})
+	// Auto-migrate the Payment model
+	db.AutoMigrate(&models.Payment{})
 
-	// Set up routes
-	r.POST("/process_payment", processPayment)
-	r.GET("/retrieve_payment/:id", retrievePayment)
+	// Initialize the service with the database
+	services.InitializeService(db)
 
-	// Run the server
-	r.Run(":8083") // Default listens and serves on 0.0.0.0:8080
+	// Initialize the router
+	r := router.SetupRouter()
+
+	log.Println("Starting server on port", os.Getenv("PORT"))
+	r.Run(os.Getenv("PORT"))
 }

@@ -1,0 +1,3 @@
+bank_simulator_url: http://localhost:8081/simulate_bank
+port: :8080
+database_url: payments.db
