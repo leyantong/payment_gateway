@@ -4,63 +4,54 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"log"
 	"net/http"
-	"os"
 	"payment_gateway/models"
+	"payment_gateway/utils"
 
+	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 )
 
 var db *gorm.DB
+var bankSimulatorURL string
 
-func InitializeService(database *gorm.DB) {
+func InitializeService(database *gorm.DB, bankURL string) {
 	db = database
+	bankSimulatorURL = bankURL
 }
 
-func ProcessPayment(request models.ProcessPaymentRequest) (models.BankResponse, error) {
-	log.Println("Service: Start ProcessPayment")
-
-	bankSimulatorURL := os.Getenv("BANK_SIMULATOR_URL")
+func ProcessPayment(request models.ProcessPaymentRequest) (models.BankResponse, uuid.UUID, error) {
 	if bankSimulatorURL == "" {
-		log.Fatal("BANK_SIMULATOR_URL is not set")
-		return models.BankResponse{}, errors.New("BANK_SIMULATOR_URL is not set")
+		return models.BankResponse{}, uuid.Nil, errors.New("BANK_SIMULATOR_URL is not set")
 	}
 
 	jsonValue, _ := json.Marshal(request)
-	log.Printf("Service: Sending request to Bank Simulator: %s\n", jsonValue)
-
 	req, err := http.NewRequest("POST", bankSimulatorURL, bytes.NewBuffer(jsonValue))
 	if err != nil {
-		log.Printf("Service Error: creating new HTTP request: %v\n", err)
-		return models.BankResponse{}, errors.New("failed to create HTTP request: " + err.Error())
+		return models.BankResponse{}, uuid.Nil, errors.New("failed to create HTTP request: " + err.Error())
 	}
-
-	req.Close = true
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
 	bankResp, err := client.Do(req)
 	if err != nil {
-		log.Printf("Service Error: sending request to Bank Simulator: %v\n", err)
-		return models.BankResponse{}, errors.New("bank processing failed: " + err.Error())
+		return models.BankResponse{}, uuid.Nil, errors.New("bank processing failed: " + err.Error())
 	}
 	defer bankResp.Body.Close()
 
-	log.Printf("Service: Bank Simulator HTTP status: %s\n", bankResp.Status)
 	if bankResp.StatusCode != http.StatusOK {
-		log.Printf("Service Error: Bank Simulator returned non-OK status: %s\n", bankResp.Status)
-		return models.BankResponse{}, errors.New("bank processing failed with status: " + bankResp.Status)
+		return models.BankResponse{}, uuid.Nil, errors.New("bank processing failed with status: " + bankResp.Status)
 	}
 
 	var bankResponse models.BankResponse
 	if err := json.NewDecoder(bankResp.Body).Decode(&bankResponse); err != nil {
-		log.Printf("Service Error: decoding Bank Simulator response: %v\n", err)
-		return models.BankResponse{}, errors.New("bank response decoding failed: " + err.Error())
+		return models.BankResponse{}, uuid.Nil, errors.New("bank response decoding failed: " + err.Error())
 	}
 
+	paymentID := utils.GeneratePaymentUUID(request.CardNumber, request.Amount)
 	payment := models.Payment{
-		CardNumber:  request.CardNumber[len(request.CardNumber)-4:],
+		ID:          paymentID,
+		CardNumber:  request.CardNumber[len(request.CardNumber)-4:], // Mask card number
 		ExpiryMonth: request.ExpiryMonth,
 		ExpiryYear:  request.ExpiryYear,
 		Amount:      request.Amount,
@@ -69,23 +60,16 @@ func ProcessPayment(request models.ProcessPaymentRequest) (models.BankResponse, 
 	}
 
 	if err := db.Create(&payment).Error; err != nil {
-		log.Printf("Service Error: saving payment to database: %v\n", err)
-		return models.BankResponse{}, errors.New("database error: " + err.Error())
+		return models.BankResponse{}, uuid.Nil, errors.New("database error: " + err.Error())
 	}
 
-	log.Printf("Service: Processed Payment: %+v\n", payment)
-	log.Println("Service: End ProcessPayment")
-	return bankResponse, nil
+	return bankResponse, paymentID, nil
 }
 
-func RetrievePayment(id string) (*models.Payment, error) {
-	log.Println("Service: Start RetrievePayment")
+func RetrievePayment(id uuid.UUID) (*models.Payment, error) {
 	var payment models.Payment
-	if err := db.First(&payment, id).Error; err != nil {
-		log.Printf("Service Error: retrieving payment by ID: %v\n", err)
+	if err := db.Where("id = ?", id).First(&payment).Error; err != nil {
 		return nil, err
 	}
-	log.Printf("Service: Retrieved Payment: %+v\n", payment)
-	log.Println("Service: End RetrievePayment")
 	return &payment, nil
 }

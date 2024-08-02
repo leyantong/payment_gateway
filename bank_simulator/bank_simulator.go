@@ -2,8 +2,10 @@ package main
 
 import (
 	"log"
+	"math/rand"
 	"net/http"
 	"payment_gateway/models"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,13 +18,18 @@ func simulateBank(c *gin.Context) {
 		return
 	}
 
-	status := "declined"
-	if request.CVV == "123" {
-		status = "approved"
+	rand.Seed(time.Now().UnixNano())
+	success := rand.Float32() > 0.2 // 80% chance of success
+	status := "DECLINED"
+	if success {
+		status = "APPROVED"
 	}
 
 	log.Printf("SimulateBank Processed Request: %+v\n", request)
-	c.JSON(http.StatusOK, gin.H{"status": status})
+	c.JSON(http.StatusOK, gin.H{
+		"status":             status,
+		"masked_card_number": "**** **** **** " + request.CardNumber[len(request.CardNumber)-4:],
+	})
 }
 
 func main() {
