@@ -24,3 +24,9 @@ func simulateBank(c *gin.Context) {
 	log.Printf("SimulateBank Processed Request: %+v\n", request)
 	c.JSON(http.StatusOK, gin.H{"status": status})
 }
+
+func main() {
+	router := gin.Default()
+	router.POST("/simulate_bank", simulateBank)
+	log.Fatal(router.Run(":8081")) // Running on port 8081 for simulation
+}
