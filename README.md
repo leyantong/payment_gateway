@@ -1,10 +1,10 @@
-# Payment Gateway
+## Payment Gateway
 
-## Project Overview
+### Project Overview
 
 The Payment Gateway project simulates a payment processing system that allows merchants to process payments and retrieve payment details. This solution includes a payment gateway service, a mock bank simulator, and integrated Swagger documentation for API exploration.
 
-## Project Structure
+### Project Structure
 
 ```plaintext
 payment_gateway/
@@ -57,7 +57,7 @@ payment_gateway/
 - **`.env`**: Environment variable configuration file.
 - **`config.yaml`**: Configuration settings for the application.
 
-## Project Workflow
+### Project Workflow
 
 1. **Processing Payments**:
    - A merchant sends a POST request to `/process_payment` with payment details.
@@ -73,15 +73,15 @@ payment_gateway/
 3. **Swagger Documentation**:
    - Swagger UI is available at `/swagger/index.html` for interactive API documentation.
 
-## Features
+### Features
 
 - **Payment Processing**: Simulates payment processing and stores results in a database.
 - **Payment Retrieval**: Allows merchants to retrieve and view details of past payments.
 - **Validation Middleware**: Ensures that payment requests meet required criteria.
+- **UUID Generation**: Generates UUIDs for each payment based on card number, amount, and timestamp.
 - **Swagger Documentation**: Provides interactive API documentation for testing and exploring endpoints.
-- **UUID Implementation**: Generates UUIDs based on card number, amount, and current timestamp for consistent and unique identification of payments.
 
-## How to Run Your Solution
+### How to Run Your Solution
 
 1. **Clone the Repository**:
    ```bash
@@ -98,15 +98,13 @@ payment_gateway/
    Create a `.env` file in the root directory with the following content:
    ```plaintext
    BANK_SIMULATOR_URL=http://localhost:8081/simulate_bank
-   PORT=8080
+   PORT=:8080
    ```
 
 4. **Run the Bank Simulator**:
    Navigate to the `bank_simulator/` directory and start the simulator:
    ```bash
-   cd bank_simulator
    go run bank_simulator.go
-   cd ..
    ```
 
 5. **Generate Swagger Documentation** (if changes are made):
@@ -130,39 +128,59 @@ payment_gateway/
    go test ./...
    ```
 
-## Assumptions Made
+### Assumptions Made
 
 - **Environment Variables**: The `.env` file is used to configure necessary environment variables. The application assumes this file is properly set up.
 - **Database**: SQLite is used for simplicity. In a production environment, a more robust database system like PostgreSQL or MySQL would be preferred.
 - **Bank Simulator**: The provided bank simulator is used to mock responses from an acquiring bank. Real-world scenarios may require more complex implementations.
 
-## Areas for Improvement
+### Areas for Improvement
 
 - **Database**: Switch to a more scalable database solution like PostgreSQL or MySQL for production use.
 - **Error Handling**: Improve error handling to provide more detailed and user-friendly error messages.
 - **Configuration Management**: Use a more advanced configuration management tool to handle environment-specific settings.
 - **Security**: Implement additional security measures such as HTTPS, input sanitization, and rate limiting.
+- **Logging**: Enhance logging to capture more detailed information and use centralized logging solutions for better monitoring and analysis.
+- **CI/CD Pipeline**: Implement a continuous integration and continuous deployment pipeline using tools like GitHub Actions or Jenkins to automate testing and deployment.
 
-## Cloud Technologies
+### Technical Debt and Considerations
+
+1. **Code Duplication**: Ensure that there's no duplicated code across services and controllers to improve maintainability.
+2. **Hardcoded Values**: Move all hardcoded values to configuration files to enhance flexibility and adaptability to different environments.
+3. **Testing**: Expand the test coverage to include more edge cases and integrate with a CI tool for automated testing.
+4. **Documentation**: Enhance the documentation to include more detailed explanations of the codebase, especially for new developers.
+5. **Scalability**: Evaluate the system's scalability and refactor the code where necessary to handle a larger volume of transactions.
+6. **Monitoring and Metrics**: Integrate monitoring and metrics collection to track system performance and identify bottlenecks.
+
+### Cloud Technologies
 
 - **Cloud Database**: Consider using a managed database service like Amazon RDS or Google Cloud SQL for better scalability and reliability.
 - **Deployment**: Use containerization with Docker and orchestration with Kubernetes to ensure consistent deployments and scaling.
 - **CI/CD**: Implement continuous integration and continuous deployment pipelines using tools like GitHub Actions or Jenkins to automate testing and deployment.
+- **Monitoring**: Use monitoring tools like Prometheus and Grafana for real-time system monitoring and alerting.
 
-## Improvements to be Made
+### Highlights of UUID Implementation
 
-1. **Add More Detailed Logging**: Enhance the logging to include more details about the requests and responses.
-2. **Advanced Validation**: Implement more advanced validation mechanisms, such as checking card number formats and expiration dates.
-3. **Enhance Security**: Add encryption for sensitive data and use HTTPS for secure communication.
-4. **Error Handling**: Improve error handling to differentiate between different types of errors and return more specific messages.
-5. **Performance Optimization**: Optimize database queries and consider caching frequently accessed data.
-6. **Scalability**: Use a scalable database solution and deploy the application using Kubernetes for better scalability.
-7. **Monitoring and Alerts**: Implement monitoring and alerting for the application using tools like Prometheus and Grafana.
+- **UUID Generation**: UUIDs are generated based on card number, amount, and timestamp to ensure uniqueness.
+- **Consistency**: The use of UUIDs ensures consistent and unique identification of each payment, making retrieval and tracking easier.
+- **Security**: Masking card numbers in stored data enhances security and PCI compliance.
 
-## UUID Implementation Highlights
+### Database Implementation
 
-- **UUID Generation**: A UUID is generated based on the card number, amount, and current timestamp. This ensures that each payment has a unique and consistent identifier.
-- **UUID Utility**: The `utils/uuid_generator.go` file contains the logic for generating UUIDs using SHA-1 hashing to ensure uniqueness based on the combination of card number, amount, and timestamp
+- **SQLite**: The project uses SQLite for simplicity and ease of setup. This choice is suitable for development and testing environments. In a production environment, a more robust and scalable database system like PostgreSQL or MySQL should be considered.
+- **ORM**: GORM is used as the ORM for database interactions. GORM provides an easy-to-use interface for CRUD operations and integrates well with Go's ecosystem.
 
-.
-- **Retrieval Using UUID**: When retrieving payment details, the UUID is used to query the database, ensuring that the correct payment record is retrieved.
+### Why Choose Go
+
+- **Performance**: Go provides high performance with its statically compiled binaries, making it an excellent choice for a high-throughput payment gateway.
+- **Concurrency**: Go's built-in support for concurrency with goroutines and channels makes it ideal for handling multiple payment transactions simultaneously.
+- **Simplicity**: Go's syntax is simple and clean, reducing the complexity of the codebase and making it easier to maintain.
+- **Strong Standard Library**: Go's standard library provides robust support for networking, HTTP servers, and cryptography, all of which are essential for a payment gateway.
+- **Community and Ecosystem**: Go has a strong and active community, with a wealth of libraries and frameworks that can accelerate development.
+
+### Workflow of Bank Simulator
+
+- **Endpoint**: The bank simulator exposes a POST endpoint `/simulate_bank` that mimics the behavior of an acquiring bank.
+- **Request Handling**: When a request is received, the simulator parses the payment details and randomly determines whether the payment is approved or declined.
+- **Response Simulation**: The simulator returns a response with a status of either "APPROVED" or "DECLINED", along with a masked card number for security.
+- **Logging**: All requests and responses are logged for debugging and analysis purposes.
