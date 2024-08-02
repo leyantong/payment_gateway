@@ -24,11 +24,3 @@ func simulateBank(c *gin.Context) {
 	log.Printf("SimulateBank Processed Request: %+v\n", request)
 	c.JSON(http.StatusOK, gin.H{"status": status})
 }
-
-func main() {
-	r := gin.Default()
-	r.POST("/simulate_bank", simulateBank)
-	if err := r.Run(":8081"); err != nil {
-		log.Fatalf("Failed to run server: %v", err)
-	}
-}

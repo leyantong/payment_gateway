@@ -44,7 +44,6 @@ func RetrievePayment(c *gin.Context) {
 		return
 	}
 
-	// Mask card number
 	maskedCardNumber := "**** **** **** " + payment.CardNumber[len(payment.CardNumber)-4:]
 	response := gin.H{
 		"payment_id":   payment.ID,

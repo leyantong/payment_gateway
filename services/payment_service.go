@@ -22,10 +22,14 @@ func ProcessPayment(request models.ProcessPaymentRequest) (models.BankResponse, 
 	log.Println("Service: Start ProcessPayment")
 
 	bankSimulatorURL := os.Getenv("BANK_SIMULATOR_URL")
+	if bankSimulatorURL == "" {
+		log.Fatal("BANK_SIMULATOR_URL is not set")
+		return models.BankResponse{}, errors.New("BANK_SIMULATOR_URL is not set")
+	}
+
 	jsonValue, _ := json.Marshal(request)
 	log.Printf("Service: Sending request to Bank Simulator: %s\n", jsonValue)
 
-	// Create a new HTTP request
 	req, err := http.NewRequest("POST", bankSimulatorURL, bytes.NewBuffer(jsonValue))
 	if err != nil {
 		log.Printf("Service Error: creating new HTTP request: %v\n", err)

@@ -20,6 +20,10 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+	bankSimulatorURL := os.Getenv("BANK_SIMULATOR_URL")
+	if bankSimulatorURL == "" {
+		log.Fatal("BANK_SIMULATOR_URL is not set")
+	}
 
 	// Initialize the database
 	db, err := gorm.Open("sqlite3", "payments.db")
