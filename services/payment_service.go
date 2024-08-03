@@ -6,23 +6,50 @@ import (
 	"errors"
 	"net/http"
 	"payment_gateway/models"
-	"payment_gateway/utils"
+	"strconv"
+	"sync"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 )
 
-var db *gorm.DB
-var bankSimulatorURL string
+var (
+	db               *gorm.DB
+	bankSimulatorURL string
+	cache            = make(map[string]time.Time)
+	cacheMutex       sync.Mutex
+	cacheDuration    = 1 * time.Hour
+)
 
 func InitializeService(database *gorm.DB, bankURL string) {
 	db = database
 	bankSimulatorURL = bankURL
 }
 
+func isDuplicatePayment(request models.ProcessPaymentRequest) bool {
+	cacheMutex.Lock()
+	defer cacheMutex.Unlock()
+
+	amountStr := strconv.FormatFloat(request.Amount, 'f', 2, 64)
+	key := request.CardNumber + request.ExpiryMonth + request.ExpiryYear + request.Currency + amountStr
+	if timestamp, found := cache[key]; found {
+		if time.Since(timestamp) < cacheDuration {
+			return true
+		}
+	}
+
+	cache[key] = time.Now()
+	return false
+}
+
 func ProcessPayment(request models.ProcessPaymentRequest) (models.BankResponse, uuid.UUID, error) {
 	if bankSimulatorURL == "" {
 		return models.BankResponse{}, uuid.Nil, errors.New("BANK_SIMULATOR_URL is not set")
+	}
+
+	if isDuplicatePayment(request) {
+		return models.BankResponse{}, uuid.Nil, errors.New("duplicate payment detected")
 	}
 
 	jsonValue, _ := json.Marshal(request)
@@ -48,7 +75,7 @@ func ProcessPayment(request models.ProcessPaymentRequest) (models.BankResponse, 
 		return models.BankResponse{}, uuid.Nil, errors.New("bank response decoding failed: " + err.Error())
 	}
 
-	paymentID := utils.GeneratePaymentUUID(request.CardNumber, request.Amount)
+	paymentID := uuid.New()
 	payment := models.Payment{
 		ID:          paymentID,
 		CardNumber:  request.CardNumber[len(request.CardNumber)-4:], // Mask card number
