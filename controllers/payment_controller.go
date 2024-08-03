@@ -13,22 +13,23 @@ import (
 func ProcessPayment(c *gin.Context) {
 	log.Println("Controller: Start ProcessPayment")
 
-	var request models.ProcessPaymentRequest
-	if err := c.BindJSON(&request); err != nil {
-		log.Printf("Controller Error: %v\n", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
+	request, exists := c.Get("payment_request")
+	if !exists {
+		log.Println("Controller Error: Payment request not found in context")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
 
-	if request.CardNumber == "" || request.ExpiryMonth == "" || request.ExpiryYear == "" || request.CVV == "" || request.Amount <= 0 || request.Currency == "" {
-		log.Println("Validation Error: Missing fields or invalid amount")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "All fields are required and amount should be greater than zero"})
+	paymentRequest, ok := request.(models.ProcessPaymentRequest)
+	if !ok {
+		log.Println("Controller Error: Invalid payment request type")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
 
-	log.Printf("Controller: Processing Payment: %+v\n", request)
+	log.Printf("Controller: Processing Payment: %+v\n", paymentRequest)
 
-	response, paymentID, err := services.ProcessPayment(request)
+	response, paymentID, err := services.ProcessPayment(paymentRequest)
 	if err != nil {
 		log.Printf("Controller Service Error: %v\n", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

@@ -12,7 +12,7 @@ func ValidatePaymentRequest() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log.Println("Middleware: Start ValidatePaymentRequest")
 		var request models.ProcessPaymentRequest
-		if err := c.BindJSON(&request); err != nil {
+		if err := c.ShouldBindJSON(&request); err != nil {
 			log.Printf("Validation Error: %v\n", err)
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
 			c.Abort()
