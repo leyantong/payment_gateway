@@ -148,12 +148,6 @@ Gin is a high-performance HTTP web framework written in Go. It was chosen for th
 3. **Middleware Support**: Gin has built-in support for middleware, which is useful for adding functionalities like logging, authentication, and error handling.
 4. **Routing**: Gin provides a powerful and flexible routing mechanism, allowing for the easy definition of routes and route groups.
 
-## Component Communication
-
-- **Controllers**: Handle HTTP requests and invoke services to process those requests. They receive input from the client, pass it to the services, and return the service responses back to the client.
-- **Services**: Contain the business logic of the application. They interact with the database (through the models) and external systems (like the bank simulator) to process payments and retrieve payment information.
-- **Models**: Define the structure of the data stored in the database. They are used by the services to perform CRUD operations on the database.
-
 ## Cache Mechanism
 
 To prevent duplicate payments, a cache mechanism is used. The cache stores recent payment requests and checks for duplicates before processing a new payment. The cache is implemented as a map where the key is a combination of payment details (card number, expiry date, amount, etc.) and the value is the timestamp of the payment request.
