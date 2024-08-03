@@ -179,23 +179,42 @@ Locks are used to ensure thread safety when accessing shared resources like the 
 - **Database**: SQLite is used for simplicity. In a production environment, a more robust database system like PostgreSQL or MySQL would be preferred.
 - **Bank Simulator**: The provided bank simulator is used to mock responses from an acquiring bank. Real-world scenarios may require more complex implementations.
 
-## Areas for Improvement
+### Areas for Improvement
 
-- **Database**: Switch to a more scalable database solution like PostgreSQL or MySQL for production use.
-- **Error Handling**: Improve error handling to provide more detailed and user-friendly error messages.
-- **Configuration Management**: Use a more advanced configuration management tool to handle environment-specific settings.
-- **Security**: Implement additional security measures such as HTTPS, input sanitization, and rate limiting.
-- **Logging**: Enhance logging to capture more detailed information and use centralized logging solutions for better monitoring and analysis.
-- **CI/CD Pipeline**: Implement a continuous integration and continuous deployment pipeline using tools like GitHub Actions or Jenkins to automate testing and deployment.
+1. **Database**: Switch to a more scalable database solution like PostgreSQL or MySQL for production use to handle larger datasets and provide better performance and reliability.
 
-## Technical Debt and Considerations
+2. **Error Handling**: Improve error handling to provide more detailed and user-friendly error messages. This includes catching and logging errors effectively, and returning clear, actionable messages to the end users.
 
-1. **Code Duplication**: Ensure that there's no duplicated code across services and controllers to improve maintainability.
-2. **Hardcoded Values**: Move all hardcoded values to configuration files to enhance flexibility and adaptability to different environments.
-3. **Testing**: Expand the test coverage to include more edge cases and integrate with a CI tool for automated testing.
-4. **Documentation**: Enhance the documentation to include more detailed explanations of the codebase, especially for new developers.
-5. **Scalability**: Evaluate the system's scalability and refactor the code where necessary to handle a larger volume of transactions.
-6. **Monitoring and Metrics**: Integrate monitoring and metrics collection to track system performance and identify bottlenecks.
+3. **Configuration Management**: Use a more advanced configuration management tool to handle environment-specific settings. Tools like Viper or Consul can provide more flexibility and manage configurations for different deployment environments.
+
+4. **Security**: Implement additional security measures such as:
+    - **HTTPS**: Ensure all communications between clients and the server are encrypted using HTTPS.
+    - **TLS**: Use TLS for encrypting data in transit to prevent interception and tampering.
+    - **Input Sanitization**: Validate and sanitize all user inputs to prevent SQL injection and other common attacks.
+    - **Rate Limiting**: Implement rate limiting to prevent abuse and mitigate DDoS attacks.
+
+5. **Logging**: Enhance logging to capture more detailed information and use centralized logging solutions for better monitoring and analysis. Tools like ELK stack (Elasticsearch, Logstash, Kibana) or Splunk can be used for this purpose.
+
+6. **CI/CD Pipeline**: Implement a continuous integration and continuous deployment pipeline using tools like GitHub Actions or Jenkins to automate testing and deployment. This ensures that the code is always in a deployable state and reduces the risk of introducing errors in production.
+
+7. **End-to-End Testing for Load Testing**: Implement end-to-end tests that simulate real-world usage and perform load testing to ensure the system can handle high traffic and large volumes of transactions.
+
+8. **Swagger API Documentation**: Add Swagger for interactive API documentation. This will make it easier for developers to explore and test the API endpoints directly from the documentation.
+
+### Technical Debt and Considerations
+
+1. **Code Duplication**: Ensure that there's no duplicated code across services and controllers to improve maintainability. Refactor common logic into reusable functions or services.
+
+2. **Hardcoded Values**: Move all hardcoded values to configuration files to enhance flexibility and adaptability to different environments. This makes it easier to manage environment-specific settings without changing the codebase.
+
+3. **Testing**: Expand the test coverage to include more edge cases and integrate with a CI tool for automated testing. Consider adding end-to-end tests and load testing to ensure the system can handle high traffic and perform reliably under stress.
+
+4. **Documentation**: Enhance the documentation to include more detailed explanations of the codebase, especially for new developers. Ensure that API endpoints are well-documented, and consider adding Swagger for interactive API documentation in the future.
+
+5. **Scalability**: Evaluate the system's scalability and refactor the code where necessary to handle a larger volume of transactions. This may include optimizing database queries, improving caching mechanisms, and using load balancers to distribute traffic evenly across servers.
+
+6. **Monitoring and Metrics**: Integrate monitoring and metrics collection to track system performance and identify bottlenecks. Tools like Prometheus and Grafana can be used to monitor application health, track key performance indicators, and set up alerts for potential issues.
+
 
 ## Cloud Technologies
 
