@@ -39,6 +39,11 @@ func TestProcessPayment(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEqual(t, uuid.Nil, paymentID)
 	assert.Equal(t, "APPROVED", response.Status)
+
+	// Attempt to process the same payment again to test duplicate detection
+	_, _, err = ProcessPayment(request)
+	assert.NotNil(t, err)
+	assert.Equal(t, "duplicate payment detected", err.Error())
 }
 
 func TestRetrievePayment(t *testing.T) {
