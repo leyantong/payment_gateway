@@ -123,7 +123,93 @@ payment_gateway/
    ```bash
    go test ./...
    ```
+   
+### Using cURL to Send Requests and Retrieve Data
 
+cURL is a command-line tool for transferring data using various network protocols. It is commonly used for making HTTP requests, which can be useful for testing and interacting with APIs. Below is a guide on how to use cURL to send requests to the payment gateway and retrieve data.
+
+#### Sending a Payment Request
+
+To process a payment, you need to send a POST request with the payment details to the `/process_payment` endpoint.
+
+**Example cURL Command:**
+
+```sh
+curl -X POST http://localhost:8080/process_payment \
+-H "Content-Type: application/json" \
+-d '{
+  "CardNumber": "4242424242424242",
+  "ExpiryMonth": "12",
+  "ExpiryYear": "2024",
+  "CVV": "123",
+  "Amount": 100.00,
+  "Currency": "USD"
+}'
+```
+
+**Explanation:**
+- `-X POST`: Specifies the request method as POST.
+- `http://localhost:8080/process_payment`: The URL of the payment processing endpoint.
+- `-H "Content-Type: application/json"`: Sets the `Content-Type` header to `application/json`, indicating that the request body contains JSON data.
+- `-d '{...}'`: The `-d` flag sends the specified data in the request body. The data is in JSON format and includes the payment details.
+
+#### Retrieving Payment Details
+
+To retrieve the details of a specific payment, you need to send a GET request to the `/retrieve_payment/:id` endpoint, where `:id` is the unique identifier of the payment.
+
+**Example cURL Command:**
+
+```sh
+curl -X GET http://localhost:8080/retrieve_payment/your-payment-id
+```
+
+**Explanation:**
+- `-X GET`: Specifies the request method as GET.
+- `http://localhost:8080/retrieve_payment/your-payment-id`: The URL of the payment retrieval endpoint, with `your-payment-id` replaced by the actual payment ID.
+
+#### Example Usage
+
+1. **Processing a Payment:**
+
+   ```sh
+   curl -X POST http://localhost:8080/process_payment \
+   -H "Content-Type: application/json" \
+   -d '{
+     "CardNumber": "4242424242424242",
+     "ExpiryMonth": "12",
+     "ExpiryYear": "2024",
+     "CVV": "123",
+     "Amount": 100.00,
+     "Currency": "USD"
+   }'
+   ```
+
+   **Expected Response:**
+   ```json
+   {
+     "Status": "APPROVED",
+     "PaymentID": "80f8ec93-6ff8-5dcc-9e83-1c438a658d86"
+   }
+   ```
+
+2. **Retrieving Payment Details:**
+
+   ```sh
+   curl -X GET http://localhost:8080/retrieve_payment/80f8ec93-6ff8-5dcc-9e83-1c438a658d86
+   ```
+
+   **Expected Response:**
+   ```json
+   {
+     "ID": "80f8ec93-6ff8-5dcc-9e83-1c438a658d86",
+     "CardNumber": "4242",
+     "ExpiryMonth": "12",
+     "ExpiryYear": "2024",
+     "Amount": 100.00,
+     "Currency": "USD",
+     "Status": "APPROVED"
+   }
+   ```
 
 ## MVC Structure
 
