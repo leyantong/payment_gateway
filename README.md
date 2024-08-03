@@ -1,10 +1,10 @@
-## Payment Gateway
+# Payment Gateway
 
-### Project Overview
+## Project Overview
 
-The Payment Gateway project simulates a payment processing system that allows merchants to process payments and retrieve payment details. This solution includes a payment gateway service, a mock bank simulator, and integrated Swagger documentation for API exploration.
+The Payment Gateway project simulates a payment processing system that allows merchants to process payments and retrieve payment details. This solution includes a payment gateway service and a mock bank simulator.
 
-### Project Structure
+## Project Structure
 
 ```plaintext
 payment_gateway/
@@ -30,7 +30,6 @@ payment_gateway/
 ├── utils/
 │   ├── logger.go
 │   └── uuid_generator.go
-├── docs/         # Swagger documentation
 ├── .env
 ├── config.yaml
 ├── go.mod
@@ -53,7 +52,6 @@ payment_gateway/
 - **`services/payment_service_test.go`**: Contains test cases for the payment service.
 - **`utils/logger.go`**: Configures and provides a logger using Uber's Zap.
 - **`utils/uuid_generator.go`**: Utility for generating UUIDs based on card number and amount.
-- **`docs/`**: Contains generated Swagger documentation.
 - **`.env`**: Environment variable configuration file.
 - **`config.yaml`**: Configuration settings for the application.
 
@@ -70,18 +68,21 @@ payment_gateway/
    - The service layer retrieves the payment details from the database.
    - Payment details, with masked card information, are returned to the merchant.
 
-3. **Swagger Documentation**:
-   - Swagger UI is available at `/swagger/index.html` for interactive API documentation.
+## Workflow of Bank Simulator
 
-### Features
+- **Endpoint**: The bank simulator exposes a POST endpoint `/simulate_bank` that mimics the behavior of an acquiring bank.
+- **Request Handling**: When a request is received, the simulator parses the payment details and randomly determines whether the payment is approved or declined.
+- **Response Simulation**: The simulator returns a response with a status of either "APPROVED" or "DECLINED", along with a masked card number for security.
+- **Logging**: All requests and responses are logged for debugging and analysis purposes.
+
+## Features
 
 - **Payment Processing**: Simulates payment processing and stores results in a database.
 - **Payment Retrieval**: Allows merchants to retrieve and view details of past payments.
 - **Validation Middleware**: Ensures that payment requests meet required criteria.
 - **UUID Generation**: Generates UUIDs for each payment based on card number, amount, and timestamp.
-- **Swagger Documentation**: Provides interactive API documentation for testing and exploring endpoints.
 
-### How to Run Your Solution
+## How to Run Your Solution
 
 1. **Clone the Repository**:
    ```bash
@@ -107,60 +108,86 @@ payment_gateway/
    go run bank_simulator.go
    ```
 
-5. **Generate Swagger Documentation** (if changes are made):
-   ```bash
-   swag init
-   ```
-
-6. **Run the Payment Gateway**:
+5. **Run the Payment Gateway**:
    ```bash
    go run main.go
    ```
 
-7. **Access Swagger UI**:
+6. **Access Swagger UI**:
    Open a browser and go to:
    ```
    http://localhost:8080/swagger/index.html
    ```
 
-8. **Run Tests**:
+7. **Run Tests**:
    ```bash
    go test ./...
    ```
 
-### Highlights of UUID Implementation
+
+## MVC Structure
+
+### Model
+
+The model represents the data layer of the application. It defines the structure of the data and the relationships between different data elements. In this application, the `models` package contains the `Payment` struct, which represents a payment entity.
+
+### View
+
+In the context of a web API, the view is represented by the responses sent back to the client. The Gin framework handles the serialization of responses to JSON format. The `controllers` package contains functions that handle the HTTP requests and send appropriate responses.
+
+### Controller
+
+The controller acts as an intermediary between the model and the view. It handles incoming HTTP requests, processes them (e.g., by interacting with the database or calling external services), and sends back the HTTP responses. In this application, the `controllers` package contains the logic for processing payments and retrieving payment information.
+
+## Why Gin Framework?
+
+Gin is a high-performance HTTP web framework written in Go. It was chosen for the following reasons:
+
+1. **Performance**: Gin is known for its speed and efficiency, making it suitable for building high-performance web applications.
+2. **Simplicity**: Gin's API is straightforward and easy to use, which accelerates development and reduces the learning curve.
+3. **Middleware Support**: Gin has built-in support for middleware, which is useful for adding functionalities like logging, authentication, and error handling.
+4. **Routing**: Gin provides a powerful and flexible routing mechanism, allowing for the easy definition of routes and route groups.
+
+## Component Communication
+
+- **Controllers**: Handle HTTP requests and invoke services to process those requests. They receive input from the client, pass it to the services, and return the service responses back to the client.
+- **Services**: Contain the business logic of the application. They interact with the database (through the models) and external systems (like the bank simulator) to process payments and retrieve payment information.
+- **Models**: Define the structure of the data stored in the database. They are used by the services to perform CRUD operations on the database.
+
+## Cache Mechanism
+
+To prevent duplicate payments, a cache mechanism is used. The cache stores recent payment requests and checks for duplicates before processing a new payment. The cache is implemented as a map where the key is a combination of payment details (card number, expiry date, amount, etc.) and the value is the timestamp of the payment request.
+
+### Use Cases
+
+- **Preventing Duplicate Payments**: The cache helps prevent duplicate payments by checking if a similar payment has been made within a specified duration (e.g., 1 hour).
+- **Performance Improvement**: By using the cache to quickly check for duplicates, the application can reduce the number of redundant database queries and improve performance.
+
+## Locks
+
+Locks are used to ensure thread safety when accessing shared resources like the cache. In this application, a `sync.Mutex` is used to protect the cache from concurrent access issues. The mutex is locked before accessing the cache and unlocked after the access is complete. This ensures that only one goroutine can access the cache at a time, preventing race conditions and ensuring data integrity.
+
+## Highlights of UUID Implementation
 
 - **UUID Generation**: UUIDs are generated based on card number, amount, and timestamp to ensure uniqueness.
 - **Consistency**: The use of UUIDs ensures consistent and unique identification of each payment, making retrieval and tracking easier.
-- **Security**: Masking card numbers in stored data enhances security and PCI compliance.
+- **
 
-### Database Implementation
+Security**: Masking card numbers in stored data enhances security and PCI compliance.
+
+## Database Implementation
 
 - **SQLite**: The project uses SQLite for simplicity and ease of setup. This choice is suitable for development and testing environments. In a production environment, a more robust and scalable database system like PostgreSQL or MySQL should be considered.
 - **ORM**: GORM is used as the ORM for database interactions. GORM provides an easy-to-use interface for CRUD operations and integrates well with Go's ecosystem.
 
-### Why Choose Go
 
-- **Performance**: Go provides high performance with its statically compiled binaries, making it an excellent choice for a high-throughput payment gateway.
-- **Concurrency**: Go's built-in support for concurrency with goroutines and channels makes it ideal for handling multiple payment transactions simultaneously.
-- **Simplicity**: Go's syntax is simple and clean, reducing the complexity of the codebase and making it easier to maintain.
-- **Strong Standard Library**: Go's standard library provides robust support for networking, HTTP servers, and cryptography, all of which are essential for a payment gateway.
-- **Community and Ecosystem**: Go has a strong and active community, with a wealth of libraries and frameworks that can accelerate development.
-
-### Workflow of Bank Simulator
-
-- **Endpoint**: The bank simulator exposes a POST endpoint `/simulate_bank` that mimics the behavior of an acquiring bank.
-- **Request Handling**: When a request is received, the simulator parses the payment details and randomly determines whether the payment is approved or declined.
-- **Response Simulation**: The simulator returns a response with a status of either "APPROVED" or "DECLINED", along with a masked card number for security.
-- **Logging**: All requests and responses are logged for debugging and analysis purposes.
-
-### Assumptions Made
+## Assumptions Made
 
 - **Environment Variables**: The `.env` file is used to configure necessary environment variables. The application assumes this file is properly set up.
 - **Database**: SQLite is used for simplicity. In a production environment, a more robust database system like PostgreSQL or MySQL would be preferred.
 - **Bank Simulator**: The provided bank simulator is used to mock responses from an acquiring bank. Real-world scenarios may require more complex implementations.
 
-### Areas for Improvement
+## Areas for Improvement
 
 - **Database**: Switch to a more scalable database solution like PostgreSQL or MySQL for production use.
 - **Error Handling**: Improve error handling to provide more detailed and user-friendly error messages.
@@ -169,7 +196,7 @@ payment_gateway/
 - **Logging**: Enhance logging to capture more detailed information and use centralized logging solutions for better monitoring and analysis.
 - **CI/CD Pipeline**: Implement a continuous integration and continuous deployment pipeline using tools like GitHub Actions or Jenkins to automate testing and deployment.
 
-### Technical Debt and Considerations
+## Technical Debt and Considerations
 
 1. **Code Duplication**: Ensure that there's no duplicated code across services and controllers to improve maintainability.
 2. **Hardcoded Values**: Move all hardcoded values to configuration files to enhance flexibility and adaptability to different environments.
@@ -178,9 +205,11 @@ payment_gateway/
 5. **Scalability**: Evaluate the system's scalability and refactor the code where necessary to handle a larger volume of transactions.
 6. **Monitoring and Metrics**: Integrate monitoring and metrics collection to track system performance and identify bottlenecks.
 
-### Cloud Technologies
+## Cloud Technologies
 
 - **Cloud Database**: Consider using a managed database service like Amazon RDS or Google Cloud SQL for better scalability and reliability.
 - **Deployment**: Use containerization with Docker and orchestration with Kubernetes to ensure consistent deployments and scaling.
 - **CI/CD**: Implement continuous integration and continuous deployment pipelines using tools like GitHub Actions or Jenkins to automate testing and deployment.
 - **Monitoring**: Use monitoring tools like Prometheus and Grafana for real-time system monitoring and alerting.
+
+---
