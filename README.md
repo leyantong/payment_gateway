@@ -165,9 +165,7 @@ Locks are used to ensure thread safety when accessing shared resources like the 
 
 - **UUID Generation**: UUIDs are generated based on card number, amount, and timestamp to ensure uniqueness.
 - **Consistency**: The use of UUIDs ensures consistent and unique identification of each payment, making retrieval and tracking easier.
-- **
-
-Security**: Masking card numbers in stored data enhances security and PCI compliance.
+- **Security**: Masking card numbers in stored data enhances security and PCI compliance.
 
 ## Database Implementation
 
