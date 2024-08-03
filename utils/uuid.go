@@ -3,15 +3,20 @@ package utils
 import (
 	"crypto/sha1"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
 )
 
-// GeneratePaymentUUID generates a UUID based on the masked card number, date, and amount.
+var mu sync.Mutex
+
 func GeneratePaymentUUID(cardNumber string, amount float64) uuid.UUID {
-	currentDate := time.Now().Format("2006-01-02") // Get current date in YYYY-MM-DD format
-	data := fmt.Sprintf("%s:%f:%s", cardNumber[len(cardNumber)-4:], amount, currentDate)
+	mu.Lock()
+	defer mu.Unlock()
+
+	timestamp := time.Now().UnixNano()
+	data := fmt.Sprintf("%s:%f:%d", cardNumber, amount, timestamp)
 	hash := sha1.New()
 	hash.Write([]byte(data))
 	hashedData := hash.Sum(nil)

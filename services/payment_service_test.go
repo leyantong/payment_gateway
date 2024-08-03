@@ -1,8 +1,9 @@
 package services
 
 import (
-	"payment_gateway/models"
 	"testing"
+
+	"payment_gateway/models"
 
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"

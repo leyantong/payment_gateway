@@ -48,7 +48,6 @@ func ProcessPayment(request models.ProcessPaymentRequest) (models.BankResponse, 
 		return models.BankResponse{}, uuid.Nil, errors.New("bank response decoding failed: " + err.Error())
 	}
 
-	// Generate a payment UUID using the improved method
 	paymentID := utils.GeneratePaymentUUID(request.CardNumber, request.Amount)
 	payment := models.Payment{
 		ID:          paymentID,
