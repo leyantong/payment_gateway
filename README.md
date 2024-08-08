@@ -6,6 +6,9 @@ The Payment Gateway project simulates a payment processing system that allows me
 
 ## Project Structure
 
+![Untitled drawing (2)](https://github.com/user-attachments/assets/61b89bb6-0dd9-481f-a072-b6d62b0fb39d)
+
+
 ```plaintext
 payment_gateway/
 ├── README.md
