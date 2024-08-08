@@ -135,16 +135,17 @@ To process a payment, you need to send a POST request with the payment details t
 **Example cURL Command:**
 
 ```sh
-curl -X POST http://localhost:8080/process_payment \
--H "Content-Type: application/json" \
--d '{
-  "CardNumber": "4242424242424242",
-  "ExpiryMonth": "12",
-  "ExpiryYear": "2024",
-  "CVV": "123",
-  "Amount": 100.00,
-  "Currency": "USD"
-}'
+ curl -X POST http://localhost:8080/process_payment \             
+  -H "Content-Type: application/json" \
+  -d '{
+    "card_number": "4242424242424242",
+    "expiry_month": "12",
+    "expiry_year": "2024",
+    "cvv": "123",
+    "amount": 11,
+    "currency": "SD"
+  }'
+
 ```
 
 **Explanation:**
